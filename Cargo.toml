@@ -1,0 +1,11 @@
+[package]
+name = "anpu"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lazy_static = "1.4"
+rustls = "0.20"
+webpki-roots = "0.22"
+r3 = { git = "https://github.com/pacujo/r3" }
+aten = { git = "https://github.com/pacujo/aten" }
