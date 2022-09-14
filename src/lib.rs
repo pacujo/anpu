@@ -8,11 +8,12 @@ use std::sync::Arc;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-use aten::{Disk, Downgradable, Link, UID, Action, DECLARE_LINKS, IMPL_STREAM};
+use aten::{Disk, Downgradable, Link, UID, Action, DECLARE_LINKS};
 use aten::error;
 use aten::stream::{ByteStream, ByteStreamBody, DebuggableByteStreamBody};
 use aten::stream::{ByteStreamPair, ByteStreamPairBody};
 use aten::stream::{DebuggableByteStreamPairBody, base, dry, queue};
+use aten::stream::{BasicStream, BasicStreamBody};
 use r3::{TRACE, Traceable};
 
 pub struct TlsClientConfig(Arc<rustls::ClientConfig>);
@@ -208,8 +209,6 @@ impl std::fmt::Display for TlsConnectionBody {
 impl DebuggableByteStreamBody for TlsConnectionBody {}
 
 impl TlsConnection {
-    IMPL_STREAM!();
-
     pub fn new_client_config() -> TlsClientConfig {
         let mut root_store = rustls::RootCertStore::empty();
         root_store.add_server_trust_anchors(
@@ -274,3 +273,11 @@ impl TlsConnection {
 
 DECLARE_LINKS!(TlsConnection, WeakTlsConnection, TlsConnectionBody,
                ANPU_TLSCONN_UPPED_MISS, CONN);
+
+impl BasicStreamBody for TlsConnectionBody {
+    fn get_base(&self) -> &base::StreamBody { &self.base }
+}
+
+impl BasicStream<WeakTlsConnection, TlsConnectionBody> for TlsConnection {
+    fn get_link(&self) -> &Link<TlsConnectionBody> { &self.0 }
+}
